@@ -1,0 +1,9 @@
+# Directories
+__pycache__/
+current/
+old/
+
+# Files
+current.txt
+properties.json
+settings.json

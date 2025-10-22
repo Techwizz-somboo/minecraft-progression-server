@@ -1,0 +1,8 @@
+{
+  "motd": "Custom MOTD",
+  "online-mode": true,
+  "server-port": 25565,
+  "difficulty": "hard",
+  "gamemode": "survival",
+  "hardcore": false
+}

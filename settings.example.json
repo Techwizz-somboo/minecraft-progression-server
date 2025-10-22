@@ -1,0 +1,8 @@
+{
+  "update_frequency_days": 7,
+  "update_time_utc": 11,
+  "update_weekday": "monday",
+  "discord_webhook_url": "",
+  "java-Xmx": "1024M",
+  "java-Xms": "1024M"
+}
