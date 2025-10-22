@@ -1,7 +1,7 @@
 {
   "motd": "Custom MOTD",
-  "online-mode": true,
-  "server-port": 25565,
+  "online-mode": false,
+  "server-port": 25566,
   "difficulty": "hard",
   "gamemode": "survival",
   "hardcore": false

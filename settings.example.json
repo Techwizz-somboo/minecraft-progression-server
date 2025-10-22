@@ -4,5 +4,9 @@
   "update_weekday": "monday",
   "discord_webhook_url": "",
   "java-Xmx": "1024M",
-  "java-Xms": "1024M"
+  "java-Xms": "1024M",
+  "viaproxy-enable": true,
+  "viaproxy-port": 25565,
+  "viaproxy-java-Xmx": "1024M",
+  "viaproxy-java-Xms": "1024M"
 }

@@ -12,6 +12,7 @@ import requests
 import shutil
 import subprocess
 from server import start_server_in_background, JavaServer
+from proxy import start_proxy_in_background, ProxyServer
 
 VERSION_RE = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+))?$")
 
@@ -93,7 +94,7 @@ def apply_properties(version: Tuple[int, int, int]):
             value = str(value)
         replace_line_in_file("current/server.properties", rf"\b{key}\b", f"{key}={value}")
     
-    return True
+    return result
 
 
 def version_to_string(version: Tuple[int, int, int]):
@@ -147,7 +148,7 @@ def get_versions() -> List[Tuple[int, int, int]]:
     return items
 
 
-def upgrade_version(server: Optional[JavaServer] = None):
+def upgrade_version(server: Optional[JavaServer] = None, proxy: Optional[ProxyServer] = None):
     version = get_version()
     versions = get_versions()
     settings = get_settings()
@@ -162,6 +163,8 @@ def upgrade_version(server: Optional[JavaServer] = None):
     else:
         version = versions[0]
     print(f"Upgrading to server version {version_to_string(version)}...")
+    if proxy:
+        proxy.stop()
     if server:
         server.stop()
     try:
@@ -201,6 +204,9 @@ def upgrade_version(server: Optional[JavaServer] = None):
     print(f"Set current version as {version_to_string(version)}!")
     if server:
         server.start()
+    if proxy:
+        proxy.set_version(version_to_string(version))
+        proxy.start()
     discord_message(f"Updated server to version {version_to_string(version)}!")
 
 
@@ -223,7 +229,7 @@ def get_settings():
     return result
 
 
-def check_updates(server: JavaServer):
+def check_updates(server: JavaServer, proxy: Optional[ProxyServer] = None):
     settings = get_settings()
     update_time = get_update_time()
 
@@ -255,14 +261,14 @@ def check_updates(server: JavaServer):
         return
 
     # Checks passed, update server
-    upgrade_version(server)
+    upgrade_version(server, proxy)
 
 
-def update_loop(server: JavaServer):
+def update_loop(server: JavaServer, proxy: Optional[ProxyServer] = None):
     while True:
         try:
             start = time.time()
-            check_updates(server)
+            check_updates(server, proxy)
         except Exception as exc:
             print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Error: {exc!r}")
         finally:
@@ -295,9 +301,13 @@ def main() -> None:
     settings = get_settings()
     if (version_to_string(get_version()) == "0.0.0"):
         upgrade_version()
+    apply_properties(get_version())
     server = start_server_in_background(settings)
+    proxy = None
+    if (settings["viaproxy-enable"]):
+        proxy = start_proxy_in_background(settings, version_to_string(get_version()), apply_properties(get_version())["server-port"])
     # Make sure update_loop() is the last line, as it loops so nothing after this will run
-    update_loop(server)
+    update_loop(server, proxy)
 
 
 if __name__ == "__main__":

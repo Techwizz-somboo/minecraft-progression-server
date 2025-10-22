@@ -1,0 +1,7 @@
+jars/
+logs/
+plugins/
+ViaLoader/
+
+saves.json
+viaproxy.yml
