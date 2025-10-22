@@ -292,11 +292,11 @@ def discord_message(message: str):
 
 
 def main() -> None:
-    # Make sure update_loop() is the last line, as it loops so nothing after this will run
     settings = get_settings()
     if (version_to_string(get_version()) == "0.0.0"):
         upgrade_version()
     server = start_server_in_background(settings)
+    # Make sure update_loop() is the last line, as it loops so nothing after this will run
     update_loop(server)
 
 

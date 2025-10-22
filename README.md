@@ -14,4 +14,4 @@ What does this script do?
 * Rename `settings.example.json` -> `settings.json`.
   * Modify to your liking
 
-Run `python3 server.py`
+Run `python3 scheduler.py`
