@@ -163,6 +163,9 @@ def upgrade_version(server: Optional[JavaServer] = None, proxy: Optional[ProxySe
     else:
         version = versions[0]
     print(f"Upgrading to server version {version_to_string(version)}...")
+    if Path("old").exists():
+        shutil.rmtree("old")
+    
     if proxy:
         proxy.stop()
     if server:
