@@ -153,6 +153,8 @@ def upgrade_version(server: Optional[JavaServer] = None, proxy: Optional[ProxySe
     versions = get_versions()
     settings = get_settings()
 
+    previous_version = version
+
     if version in versions:
         index = versions.index(version)
         if (index + 1 < len(versions)):
@@ -181,6 +183,13 @@ def upgrade_version(server: Optional[JavaServer] = None, proxy: Optional[ProxySe
         print(f"Failed to move current folder: {err}")
         return
     
+    os.makedirs("backup", exist_ok=True)
+
+    try:
+        shutil.copytree("old", f"backup/{version_to_string(previous_version)}")
+    except:
+        print("Failed to backup previous version, maybe there is no previous version?")
+
     # Setup the server
     os.makedirs("current", exist_ok=True)
     try:
