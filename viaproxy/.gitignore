@@ -1,7 +1,7 @@
 jars/
 logs/
 plugins/
-ViaLoader/
+ViaLoader/viabedrock/
 
 saves.json
 viaproxy.yml
