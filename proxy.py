@@ -72,6 +72,11 @@ class ProxyServer:
       self.version = ver
 
     def _run_loop(self) -> None:
+        version = self.version
+
+        if (version).endswith('.0'):
+            version = version[:-2]
+
         cmd = [
             "java",
             f"-Xmx{self.settings['viaproxy-java-Xmx']}",
@@ -88,7 +93,7 @@ class ProxyServer:
             "--target-address",
             f"127.0.0.1:{self.port}",
             "--target-version",
-            self.version,
+            version,
         ]
 
         while not self._stop_event.is_set():
