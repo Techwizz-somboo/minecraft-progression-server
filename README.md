@@ -5,7 +5,7 @@ This is some python script I made to start a Minecraft 'progression' server.
 What does this script do?
 * Start at Minecraft 1.0
 * Auto update on a custom schedule set in settings.json
-* Goes up to version 1.21.10
+* Goes up to version 1.21.11
 
 ## Setup
 
