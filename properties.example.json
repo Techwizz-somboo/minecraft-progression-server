@@ -4,5 +4,6 @@
   "server-port": 25566,
   "difficulty": "hard",
   "gamemode": "survival",
-  "hardcore": false
+  "hardcore": false,
+  "use-native-transport": false
 }
