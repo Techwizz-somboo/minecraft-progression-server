@@ -16,7 +16,7 @@ from proxy import start_proxy_in_background, ProxyServer
 
 VERSION_RE = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+))?$")
 
-
+# Helper function to replace a line in a file that matches a pattern with a replacement string. Returns True if a replacement was made.
 def replace_line_in_file(
     filename: Union[str, Path],
     pattern: Union[str, Pattern[str]],
@@ -49,12 +49,13 @@ def replace_line_in_file(
 
     return replaced
 
-
+# Apply the properties from properties.json to the server.properties file, converting values as needed based on the server version.
 def apply_properties(version: Tuple[int, int, int]):
     data = json.loads(Path("properties.json").read_text(encoding="utf-8"))
 
     result: Dict[str, Any] = {}
     
+    # Walk through the properties data recursively and flatten it into a single dictionary with dot-separated keys.
     def _walk(node: Any, prefix: str = "") -> None:
         if isinstance(node, dict):
             for k, v in node.items():
@@ -96,18 +97,18 @@ def apply_properties(version: Tuple[int, int, int]):
     
     return result
 
-
+# Helper function to convert a version tuple to a string.
 def version_to_string(version: Tuple[int, int, int]):
     return f"{version[0]}.{version[1]}.{version[2]}"
 
-
+# Create the current.txt file if it doesn't exist, with a default version of 0.0.0 and a timestamp of 2000-01-01.
 def create_version_file():
     if not Path("current.txt").exists():
         Path("current.txt").touch(mode=0o666, exist_ok=True)
         Path("current.txt").write_text("0.0.0\n2000-01-01 00:00:00.000000+00:00", encoding='utf-8')
         print(f"Created current.txt to keep track of currently set version")
 
-
+# Get the current server version from current.txt, creating the file if it doesn't exist. Returns a version tuple.
 def get_version() -> Tuple[int, int, int]:
     create_version_file()
     
@@ -115,7 +116,7 @@ def get_version() -> Tuple[int, int, int]:
         version_str, ts_str = f.read().splitlines()
         return parse_version(version_str)
 
-
+# Get the last update time from current.txt, creating the file if it doesn't exist. Returns a datetime object.
 def get_update_time():
     create_version_file()
     
@@ -123,7 +124,7 @@ def get_update_time():
         version_str, ts_str = f.read().splitlines()
         return datetime.fromisoformat(ts_str)
 
-
+# Get a list of available server versions by looking at the folders in the servers directory and parsing their names as versions. Returns a list of version tuples.
 def parse_version(name: str) -> Optional[Tuple[int, int, int]]:
     match = VERSION_RE.match(name)
     if not match:
@@ -133,7 +134,7 @@ def parse_version(name: str) -> Optional[Tuple[int, int, int]]:
     patch = patch or "0"
     return int(major), int(minor), int(patch)
 
-
+# Get a list of available server versions by looking at the folders in the servers directory and parsing their names as versions. Returns a list of version tuples.
 def get_versions() -> List[Tuple[int, int, int]]:
     base = "servers"
     items = []
@@ -147,7 +148,7 @@ def get_versions() -> List[Tuple[int, int, int]]:
     items.sort(key=lambda x: x[1])
     return items
 
-
+# Upgrade the server to the next available version, stopping the server and proxy if they are running, backing up the old version, copying the new server files, applying properties, and restarting the server and proxy. Also sends a Discord message about the update.
 def upgrade_version(server: Optional[JavaServer] = None, proxy: Optional[ProxyServer] = None):
     version = get_version()
     versions = get_versions()
@@ -221,12 +222,13 @@ def upgrade_version(server: Optional[JavaServer] = None, proxy: Optional[ProxySe
         proxy.start()
     discord_message(f"Updated server to version {version_to_string(version)}!")
 
-
+# This module provides functions for managing server versions, applying properties, and checking for updates on a schedule. It also includes a main function that starts the server and proxy and runs the update loop.
 def get_settings():
     data = json.loads(Path("settings.json").read_text(encoding="utf-8"))
 
     result: Dict[str, Any] = {}
     
+    # Walk through the settings data recursively and flatten it into a single dictionary with dot-separated keys.
     def _walk(node: Any, prefix: str = "") -> None:
         if isinstance(node, dict):
             for k, v in node.items():
@@ -240,7 +242,7 @@ def get_settings():
     _walk(data)
     return result
 
-
+# The main loop that checks for updates on a schedule and upgrades the server if needed. It checks the update frequency, weekday, and time from the settings before performing an update.
 def check_updates(server: JavaServer, proxy: Optional[ProxyServer] = None):
     settings = get_settings()
     update_time = get_update_time()
@@ -275,7 +277,7 @@ def check_updates(server: JavaServer, proxy: Optional[ProxyServer] = None):
     # Checks passed, update server
     upgrade_version(server, proxy)
 
-
+# The main loop that runs the Java server process and restarts it if it crashes.
 def update_loop(server: JavaServer, proxy: Optional[ProxyServer] = None):
     while True:
         try:
@@ -288,7 +290,7 @@ def update_loop(server: JavaServer, proxy: Optional[ProxyServer] = None):
             sleep_time = max(60.0 - elapsed, 0.0)
             time.sleep(sleep_time)
 
-
+# This module provides a JavaServer class that manages the lifecycle of a Java server process, including starting, stopping, and restarting the server if it crashes. It also includes a main loop that runs the server and checks for updates on a schedule.
 def discord_message(message: str):
     webhook_url = get_settings()["discord_webhook_url"]
     if not webhook_url or webhook_url == "":
@@ -308,7 +310,7 @@ def discord_message(message: str):
         print(f"Failed to send Discord message: {exc}", file=sys.stderr)
         return
 
-
+# This module provides a JavaServer class that manages the lifecycle of a Java server process, including starting, stopping, and restarting the server if it crashes. It also includes a main loop that runs the server and checks for updates on a schedule.
 def main() -> None:
     settings = get_settings()
     if (version_to_string(get_version()) == "0.0.0"):
