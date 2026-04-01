@@ -11,7 +11,10 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
+# This module provides a JavaServer class that manages the lifecycle of a Java server process.
 class JavaServer:
+
+    # Initialize the JavaServer with settings and options. The settings should include "java-Xmx" and "java-Xms" for memory configuration.
     def __init__(
         self,
         settings: Dict[str, Any],
@@ -28,6 +31,7 @@ class JavaServer:
         self._proc: subprocess.Popen | None = None
         self._thread: threading.Thread | None = None
 
+    # Start the server in a background thread. If the server is already running, this does nothing.
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
             logging.warning("Server thread already running")
@@ -40,6 +44,7 @@ class JavaServer:
         self._thread.start()
         logging.info("JavaServer thread started")
 
+    # Stop the server and wait for it to exit, with a timeout. If the JVM does not exit gracefully, kill it.
     def stop(self, timeout: float | None = 10.0) -> None:
         logging.info("Stopping Java server …")
         self._stop_event.set()
@@ -66,6 +71,7 @@ class JavaServer:
         self._proc = None
         self._stop_event.clear()
 
+    # The main loop that runs the Java server process and restarts it if it crashes.
     def _run_loop(self) -> None:
         cmd = [
             "java",
@@ -111,6 +117,7 @@ class JavaServer:
                 logging.exception("Unexpected error while running JVM: %s", exc)
                 time.sleep(self.restart_delay)
 
+# Helper function to start the server in the background and return the JavaServer instance.
 def start_server_in_background(settings: Dict[str, Any]) -> JavaServer:
     server = JavaServer(settings)
     server.start()

@@ -11,6 +11,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
+# This module provides a ProxyServer class that manages the lifecycle of a ViaProxy server process, which acts as a proxy for Minecraft servers. It includes methods to start and stop the proxy, as well as a main loop that restarts the proxy if it crashes. The proxy is configured to allow legacy client passthrough and to bind to a specified address and port, forwarding traffic to a target Minecraft server.
 class ProxyServer:
     def __init__(
         self,
@@ -30,6 +31,7 @@ class ProxyServer:
         self._proc: subprocess.Popen | None = None
         self._thread: threading.Thread | None = None
 
+    # Start the proxy server in a background thread. If the proxy is already running, this does nothing.
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
             logging.warning("ProxyServer thread already running")
@@ -42,6 +44,7 @@ class ProxyServer:
         self._thread.start()
         logging.info("ProxyServer thread started")
 
+    # Stop the proxy server and wait for it to exit, with a timeout. If the JVM does not exit gracefully, kill it.
     def stop(self, timeout: float | None = 10.0) -> None:
         logging.info("Stopping Proxy server …")
         self._stop_event.set()
@@ -68,9 +71,11 @@ class ProxyServer:
         self._proc = None
         self._stop_event.clear()
 
+    # Set the Minecraft version to proxy for. This will be used in the command line arguments when launching ViaProxy.
     def set_version(self, ver: str):
       self.version = ver
 
+    # The main loop that runs the ViaProxy server process and restarts it if it crashes. It constructs the command line arguments based on the settings and version, launches the process, and monitors it for crashes or stop requests.
     def _run_loop(self) -> None:
         version = self.version
 
@@ -131,6 +136,7 @@ class ProxyServer:
                 logging.exception("Unexpected error while running ViaProxy: %s", exc)
                 time.sleep(self.restart_delay)
 
+# Helper function to start the proxy server in the background and return the ProxyServer instance.
 def start_proxy_in_background(settings: Dict[str, Any], version: str, port: int) -> ProxyServer:
     proxy = ProxyServer(settings, version, port)
     proxy.start()
